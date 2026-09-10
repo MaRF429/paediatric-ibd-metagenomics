@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Classify one sample, estimate species abundance, and convert its report.
-# Usage: bash kraken2_bracken.sh MODE READ1 READ2 SAMPLE_ID DB_DIR OUTPUT_DIR [THREADS]
+# Usage: bash 03_kraken2_bracken.sh MODE READ1 READ2 SAMPLE_ID DB_DIR OUTPUT_DIR [THREADS]
 # MODE is paired or single; use - as READ2 in single mode.
 # Supply an existing database with the matching Bracken distribution files.
 mode="${1:?Mode is required}"

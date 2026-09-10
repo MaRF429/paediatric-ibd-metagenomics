@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Analyze one input table per invocation.
-# Usage: bash 07_fastspar.sh INPUT_TSV OUTPUT_DIR PREFIX [THREADS]
+# Usage: bash 05_fastspar.sh INPUT_TSV OUTPUT_DIR PREFIX [THREADS]
 input_table="${1:?Input TSV table is required}"
 output_dir="${2:?Output directory is required}"
 prefix="${3:?Output prefix is required}"

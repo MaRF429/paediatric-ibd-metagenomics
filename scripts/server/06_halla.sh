@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Run the six specified species-function association analyses.
-# Usage: bash 08_halla.sh INPUT_DIR OUTPUT_ROOT
+# Usage: bash 06_halla.sh INPUT_DIR OUTPUT_ROOT
 input_dir="${1:?Input table directory is required}"
 output_root="${2:?Output root is required}"
 [[ -d "$input_dir" ]] || { echo "Input directory does not exist." >&2; exit 1; }
