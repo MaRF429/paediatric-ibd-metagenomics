@@ -87,15 +87,10 @@ build_melody_input <- function(abd, meta, group_var, case_label, control_label,
 
     adj <- meta_sub[idx, adjust_vars, drop = FALSE]
 
-    if ("Age" %in% colnames(adj)) {
-      adj$Age <- as.numeric(as.character(adj$Age))
-    }
-
-    if ("Sex" %in% colnames(adj)) {
-      adj$Sex <- ifelse(adj$Sex %in% c("Male", "M", 1), 1,
-                        ifelse(adj$Sex %in% c("Female", "F", 0), 0, NA))
-      adj$Sex <- as.numeric(adj$Sex)
-    }
+    adj$Age <- as.numeric(as.character(adj$Age))
+    adj$Sex <- ifelse(adj$Sex %in% c("Male", "M", 1), 1,
+                      ifelse(adj$Sex %in% c("Female", "F", 0), 0, NA))
+    adj$Sex <- as.numeric(adj$Sex)
 
     rownames(adj) <- samps
     covariates.adjust[[co]] <- adj
@@ -111,27 +106,6 @@ build_melody_input <- function(abd, meta, group_var, case_label, control_label,
 clean_covariates <- function(input) {
   for (co in names(input$covariates.adjust)) {
     adj <- input$covariates.adjust[[co]]
-    if (is.null(adj)) next
-
-    keep_cols <- intersect(c("Age", "Sex"), colnames(adj))
-    adj <- adj[, keep_cols, drop = FALSE]
-
-    if (ncol(adj) == 0) {
-
-      input$covariates.adjust[[co]] <- NULL
-      next
-    }
-
-    if ("Age" %in% colnames(adj)) {
-      adj$Age <- as.numeric(as.character(adj$Age))
-    }
-    if ("Sex" %in% colnames(adj)) {
-
-      adj$Sex <- ifelse(adj$Sex %in% c("Male", "M", 1), 1,
-                        ifelse(adj$Sex %in% c("Female", "F", 0), 0, NA))
-      adj$Sex <- as.numeric(adj$Sex)
-    }
-
     bad_cols <- vapply(adj, function(x) any(is.na(x)), logical(1))
     adj <- adj[, !bad_cols, drop = FALSE]
 
