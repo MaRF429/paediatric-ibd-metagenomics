@@ -37,9 +37,6 @@ get_representative_params <- function(task_prefix, cohort) {
     LOCALCV_DIR,
     paste0(task_prefix, "_LocalCV_RF_", cohort, "_selfcv_repeat_bestTune.csv")
   )
-  if (!file.exists(file_para)) {
-    stop("Required input is unavailable or invalid.", file_para)
-  }
 
   para_df <- read.csv(file_para, header = TRUE, check.names = FALSE)
 
