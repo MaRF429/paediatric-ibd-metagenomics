@@ -72,17 +72,17 @@ RunML <- function(method, Train_set, Train_label, mode = "Model", classVar){
 
   args = list("Train_set" = Train_set,
               "Train_label" = Train_label,
-              "mode" = mode,
               "classVar" = classVar)
   args = c(args, method_param)
 
   obj <- do.call(what = paste0("Run", method_name),
                  args = args)
 
+  if (mode == "Variable") return(ExtractVar(obj))
   return(obj)
 }
 
-RunEnet <- function(Train_set, Train_label, mode, classVar, alpha){
+RunEnet <- function(Train_set, Train_label, classVar, alpha){
   cv.fit = cv.glmnet(x = Train_set,
                      y = Train_label[[classVar]],
                      family = "binomial", alpha = alpha, nfolds = 10)
@@ -90,39 +90,36 @@ RunEnet <- function(Train_set, Train_label, mode, classVar, alpha){
                y = Train_label[[classVar]],
                family = "binomial", alpha = alpha, lambda = cv.fit$lambda.min)
   fit$subFeature = colnames(Train_set)
-  if (mode == "Model") return(fit)
-  if (mode == "Variable") return(ExtractVar(fit))
+  return(fit)
 }
 
-RunLasso <- function(Train_set, Train_label, mode, classVar){
-  RunEnet(Train_set, Train_label, mode, classVar, alpha = 1)
+RunLasso <- function(Train_set, Train_label, classVar){
+  RunEnet(Train_set, Train_label, classVar, alpha = 1)
 }
 
-RunRidge <- function(Train_set, Train_label, mode, classVar){
-  RunEnet(Train_set, Train_label, mode, classVar, alpha = 0)
+RunRidge <- function(Train_set, Train_label, classVar){
+  RunEnet(Train_set, Train_label, classVar, alpha = 0)
 }
 
-RunStepglm <- function(Train_set, Train_label, mode, classVar, direction){
+RunStepglm <- function(Train_set, Train_label, classVar, direction){
   fit <- step(glm(formula = Train_label[[classVar]] ~ .,
                   family = "binomial",
                   data = as.data.frame(Train_set)),
               direction = direction, trace = 0)
   fit$subFeature = colnames(Train_set)
-  if (mode == "Model") return(fit)
-  if (mode == "Variable") return(ExtractVar(fit))
+  return(fit)
 }
 
-RunSVM <- function(Train_set, Train_label, mode, classVar){
+RunSVM <- function(Train_set, Train_label, classVar){
   data <- as.data.frame(Train_set)
   data[[classVar]] <- as.factor(Train_label[[classVar]])
   fit = svm(formula = eval(parse(text = paste(classVar, "~."))),
             data= data, probability = T)
   fit$subFeature = colnames(Train_set)
-  if (mode == "Model") return(fit)
-  if (mode == "Variable") return(ExtractVar(fit))
+  return(fit)
 }
 
-RunLDA <- function(Train_set, Train_label, mode, classVar){
+RunLDA <- function(Train_set, Train_label, classVar){
   data <- as.data.frame(Train_set)
   data[[classVar]] <- as.factor(Train_label[[classVar]])
   fit = train(eval(parse(text = paste(classVar, "~."))),
@@ -130,11 +127,10 @@ RunLDA <- function(Train_set, Train_label, mode, classVar){
               method="lda",
               trControl = trainControl(method = "cv"))
   fit$subFeature = colnames(Train_set)
-  if (mode == "Model") return(fit)
-  if (mode == "Variable") return(ExtractVar(fit))
+  return(fit)
 }
 
-RunglmBoost <- function(Train_set, Train_label, mode, classVar){
+RunglmBoost <- function(Train_set, Train_label, classVar){
   data <- cbind(Train_set, Train_label[classVar])
   data[[classVar]] <- as.factor(data[[classVar]])
   fit <- glmboost(eval(parse(text = paste(classVar, "~."))),
@@ -149,11 +145,10 @@ RunglmBoost <- function(Train_set, Train_label, mode, classVar){
                   control = boost_control(mstop = max(mstop(cvm), 40)))
 
   fit$subFeature = colnames(Train_set)
-  if (mode == "Model") return(fit)
-  if (mode == "Variable") return(ExtractVar(fit))
+  return(fit)
 }
 
-RunplsRglm <- function(Train_set, Train_label, mode, classVar){
+RunplsRglm <- function(Train_set, Train_label, classVar){
   cv.plsRglm.res = cv.plsRglm(formula = Train_label[[classVar]] ~ .,
                               data = as.data.frame(Train_set),
                               nt=10, verbose = FALSE)
@@ -162,11 +157,10 @@ RunplsRglm <- function(Train_set, Train_label, mode, classVar){
                  modele = "pls-glm-logistic",
                  verbose = F, sparse = T)
   fit$subFeature = colnames(Train_set)
-  if (mode == "Model") return(fit)
-  if (mode == "Variable") return(ExtractVar(fit))
+  return(fit)
 }
 
-RunRF <- function(Train_set, Train_label, mode, classVar){
+RunRF <- function(Train_set, Train_label, classVar){
   rf_nodesize = 5
   Train_label[[classVar]] <- as.factor(Train_label[[classVar]])
   fit <- rfsrc(formula = formula(paste0(classVar, "~.")),
@@ -176,11 +170,10 @@ RunRF <- function(Train_set, Train_label, mode, classVar){
                proximity = T,
                forest = T)
   fit$subFeature = colnames(Train_set)
-  if (mode == "Model") return(fit)
-  if (mode == "Variable") return(ExtractVar(fit))
+  return(fit)
 }
 
-RunGBM <- function(Train_set, Train_label, mode, classVar){
+RunGBM <- function(Train_set, Train_label, classVar){
   fit <- gbm(formula = Train_label[[classVar]] ~ .,
              data = as.data.frame(Train_set),
              distribution = 'bernoulli',
@@ -198,11 +191,10 @@ RunGBM <- function(Train_set, Train_label, mode, classVar){
              n.minobsinnode = 10,
              shrinkage = 0.001, n.cores = 8)
   fit$subFeature = colnames(Train_set)
-  if (mode == "Model") return(fit)
-  if (mode == "Variable") return(ExtractVar(fit))
+  return(fit)
 }
 
-RunXGBoost <- function(Train_set, Train_label, mode, classVar){
+RunXGBoost <- function(Train_set, Train_label, classVar){
 
   y <- Train_label[[classVar]]
   indexes = createFolds(y, k = 5, list = TRUE)
@@ -240,18 +232,16 @@ RunXGBoost <- function(Train_set, Train_label, mode, classVar){
     verbose  = FALSE
   )
   fit$subFeature = colnames(Train_set)
-  if (mode == "Model")    return(fit)
-  if (mode == "Variable") return(ExtractVar(fit))
+  return(fit)
 }
 
-RunNaiveBayes <- function(Train_set, Train_label, mode, classVar){
+RunNaiveBayes <- function(Train_set, Train_label, classVar){
   data <- cbind(Train_set, Train_label[classVar])
   data[[classVar]] <- as.factor(data[[classVar]])
   fit <- naiveBayes(eval(parse(text = paste(classVar, "~."))),
                     data = data)
   fit$subFeature = colnames(Train_set)
-  if (mode == "Model") return(fit)
-  if (mode == "Variable") return(ExtractVar(fit))
+  return(fit)
 }
 
 quiet <- function(...) suppressMessages(eval(...))
